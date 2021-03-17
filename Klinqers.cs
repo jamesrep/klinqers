@@ -82,7 +82,23 @@ namespace klinqers
                     }
                 }
 
-                CallMethod cm = getMethodPosition(strCall, lstValues.Count, parameterType, null);
+                string strType = strCall.Substring(0, strCall.LastIndexOf('.'));
+                Type t = Type.GetType(strType);
+
+                if (t == null)
+                {
+                    Console.WriteLine("[+] Ok. The type was not easily created. Lets try CreateInstanceAndUnwrap");
+
+                    Type tTemp = Type.GetType("System.AppDomain");
+
+                    CallMethod cm1 = CallMethod.getMethodPosition(tTemp, "System.AppDomain.CreateInstanceAndUnwrap", 2, typeof(System.String), null);
+
+                    strCompiled = cm1.buildParameterStringByCIAU(lstValues, strCall);
+
+                    return strCompiled;
+                }
+
+                CallMethod cm = CallMethod.getMethodPosition(t, strCall, lstValues.Count, parameterType, null);
 
                 if (cm.methodPosition >= 0)
                 {
@@ -101,57 +117,7 @@ namespace klinqers
 
 
 
-        static CallMethod getMethodPosition(string strMethodName, int parameterCount, System.Type callType, string strAssemblyPath)
-        {
-            string strType = strMethodName.Substring(0, strMethodName.LastIndexOf('.'));
-            Assembly a = Assembly.GetExecutingAssembly();
 
-            Type t = Type.GetType(strType);  
-            string strMethodPart = strMethodName.Substring(strMethodName.LastIndexOf('.')+1);
-            MethodInfo[] minf = t.GetMethods();
-
-            CallMethod callMethod = new CallMethod()
-            {
-                assembly = a,
-                type = t,
-                strMethodPart = strMethodPart,
-                strTypePart = strType
-            };
-
-            for (int x = 0; x < minf.Length; x++)
-            {
-                MethodInfo m = minf[x];
-
-                if (m.Name == strMethodPart)
-                {
-                    ParameterInfo[] p = m.GetParameters();
-
-                    if (p.Length != parameterCount) continue;
-
-                    bool bFoundCall = true;
-
-                    for (int i = 0; i < p.Length; i++)
-                    {
-                        if (p[i].ParameterType != callType)
-                        {
-                            bFoundCall = false;
-                            
-                            break;
-                        }
-                    }
-
-                    if (bFoundCall)
-                    {
-                        callMethod.methodPosition = x;
-                        callMethod.minf = m;
-                        callMethod.parameterType = callType;
-                        break;
-                    }
-                }
-            }
-
-            return callMethod;
-        }
 
         public static void printAssemblies()
         {

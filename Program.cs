@@ -14,15 +14,20 @@ namespace klinqers
 
         public static void Main(string[] args)
         {
+            //"c:/windows/system32/hosts".Split(";".ToCharArray())
+            //"".GetType().Assembly.GetType("System.IO.File").GetMethods()[29].Invoke(null, new object[] { }).ToString();
+
+            //object obj = "".GetType().Assembly.GetType("System.IO.File").GetMethods()[29].Invoke(null, "/etc/passwd".Split(";".ToCharArray())).ToString();
+
+            //object obj = "".GetType().Assembly.GetType("System.AppDomain").GetMethods()[18].Invoke("".GetType().Assembly.GetType("System.AppDomain").GetProperty("CurrentDomain").GetValue(null), "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;System.Diagnostics.Process".Split(";".ToCharArray())).GetType().GetMethods()[44].Invoke(null, "ls;-l".Split(";".ToCharArray()));
+
+
+
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--assemblies")
                 {
                     Console.WriteLine("[+] Creating list for all assemblies in appdomain");
-
-                    System.Diagnostics.Process p = new System.Diagnostics.Process();
-                    //string strAssembly = p.GetType().Assembly.FullName;
-
                    
                     Klinqers.printAssemblies();
                 }
