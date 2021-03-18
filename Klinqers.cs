@@ -1,8 +1,10 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.CSharp;
 
 namespace klinqers
 {
@@ -52,6 +54,65 @@ namespace klinqers
             }
 
             return lstArray;
+        }
+
+        public class DummyClass
+        {
+            public virtual object getResult()
+            {
+                return null;
+            }
+        }
+
+
+        public static void executeCSharp(string strInjection)
+        {
+#pragma warning disable CS0618
+            CSharpCodeProvider codeProvider = new CSharpCodeProvider();
+            ICodeCompiler icc = codeProvider.CreateCompiler();
+
+            AssemblyName[] references = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
+
+            System.CodeDom.Compiler.CompilerParameters parameters = new CompilerParameters();
+            parameters.GenerateExecutable = false;
+            parameters.GenerateInMemory = true;
+
+            for (int x = 0; x < references.Length; x++)
+            {
+                parameters.ReferencedAssemblies.Add(references[x].Name + ".dll");
+            }
+
+            parameters.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
+
+
+            string strSource = "class Dummy1 : klinqers.Klinqers.DummyClass { public override object getResult() { return " + strInjection + " ; }} ";
+
+
+            CompilerResults results = icc.CompileAssemblyFromSource(parameters, strSource);
+
+
+            // If compile errors
+            for (int x = 0; x < results.Errors.Count; x++)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[-] Error: " + results.Errors[x].ErrorText);
+                Console.ResetColor();
+            }
+
+            Klinqers.DummyClass obj =  (Klinqers.DummyClass ) results.CompiledAssembly.CreateInstance("Dummy1");
+
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            object objResult = obj.getResult();
+
+            Console.ResetColor();
+
+            if (objResult != null)
+            {
+                Console.WriteLine("[+] Result: " + objResult.ToString());
+            }
+
+
         }
 
         public static string getCall(string strNetCall)
