@@ -129,20 +129,6 @@ namespace klinqers
                 List<string> lstValues = splitStrings(strParameters);
                 Type parameterType = typeof(String);
 
-
-                if (strParameters.IndexOf('(') == 0) // We have a different type than string or int
-                {
-                }
-                else if (strParameters.IndexOf('"') == 0) // We have a string
-                {
-                    Match mStrings = Regex.Match(strParameters, "(?<input>[^,]{0,})[,]{0,}");
-
-                    foreach (Capture c in mStrings.Captures)
-                    {
-                        lstValues.Add(c.Value);
-                    }
-                }
-
                 string strType = strCall.Substring(0, strCall.LastIndexOf('.'));
                 Type t = Type.GetType(strType);
 

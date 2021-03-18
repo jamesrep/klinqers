@@ -12,8 +12,6 @@ namespace klinqers
 
         static void printHelp()
         {
-            Console.WriteLine("\r\n [Klinqers] an app for testing Linq-injections (License GPL 2.0 - James Dickson 2021)\r\n");
-
             Console.WriteLine("--assemblies           Creating list for all assemblies in appdomain");
             Console.WriteLine("--type <typename>      Creating list for specific type");
             Console.WriteLine("--call <systemcall>    Create an injectable command for the API-call");
@@ -32,6 +30,8 @@ namespace klinqers
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("\r\n [klinqers] - an app for testing Linq-injections (License GPL 2.0 - James Dickson 2021)\r\n");
+
             //"c:/windows/system32/hosts".Split(";".ToCharArray())
             //"".GetType().Assembly.GetType("System.IO.File").GetMethods()[29].Invoke(null, new object[] { }).ToString();
 
@@ -39,7 +39,7 @@ namespace klinqers
 
             //object obj = "".GetType().Assembly.GetType("System.AppDomain").GetMethods()[18].Invoke("".GetType().Assembly.GetType("System.AppDomain").GetProperty("CurrentDomain").GetValue(null), "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;System.Diagnostics.Process".Split(";".ToCharArray())).GetType().GetMethods()[44].Invoke(null, "ls;-l".Split(";".ToCharArray()));
 
-            if(args.Length < 1)
+            if (args.Length < 1)
             {
                 printHelp();
                 return;
@@ -88,20 +88,33 @@ namespace klinqers
                         string strCall = args[++i];
 
                         Console.WriteLine("[+] Creating call for " + strCall);
+                        string strCompiled = null;
 
-                        string strCompiled = Klinqers.getCall(strCall);
-
-                        if (strCompiled != null)
+                        try
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
+                            strCompiled = Klinqers.getCall(strCall);
 
-                            Console.WriteLine("\r\n[+] ----------- Injectable Code -- ---------------\r\n");
-                            Console.WriteLine(strCompiled);
-                            Console.WriteLine("\r\n[+] ----------- ----------------------------------\r\n");
+                            if (strCompiled != null && strCompiled.Length > 0)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
 
-                            Console.ResetColor();
-                            //Console.ForegroundColor = color;
+                                Console.WriteLine("\r\n[+] ----------- Injectable Code -- ---------------\r\n");
+                                Console.WriteLine(strCompiled);
+                                Console.WriteLine("\r\n[+] ----------- ----------------------------------\r\n");
+
+                                Console.ResetColor();
+                                //Console.ForegroundColor = color;
+                            }
+                            else
+                            {
+                                Console.WriteLine("[-] Error: Could not create call for :" + strCall);
+                            }
                         }
+                        catch(Exception ex)
+                        {
+                            Console.WriteLine("[-] Error: Exception when trying to create an injectable call: " + ex.Message);
+                        }
+
 
                         strCurrentCall = strCompiled;
                     }
