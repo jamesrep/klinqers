@@ -1,4 +1,5 @@
-﻿using System;
+﻿// James Dickson 2021, License GPL 2.0 (see file in project)
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 

